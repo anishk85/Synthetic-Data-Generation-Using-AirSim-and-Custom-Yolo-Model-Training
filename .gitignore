@@ -83,12 +83,15 @@ images/
 settings.json
 
 # LaTeX
+*.tex
 *.aux
 *.log
 *.out
 *.toc
 *.pdf
 *.synctex.gz
+*.lof
+*.lot
 
 # OS
 Thumbs.db
