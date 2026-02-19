@@ -1,0 +1,28 @@
+# AirSim Object Detection Dataset Configuration for YOLOv11
+# Dataset structure: 
+#   dataset/
+#     train/
+#       images/
+#       labels/
+#     val/
+#       images/
+#       labels/
+#     test/
+#       images/
+#       labels/
+
+# Paths (relative to this config file)
+path: dataset  # Root directory
+train: train/images  # Training images
+val: val/images      # Validation images
+test: test/images    # Test images (optional)
+
+# Number of classes
+nc: 4
+
+# Class names (must match the order in your labels)
+names:
+  0: Car
+  1: Hedge
+  2: Tree
+  3: House

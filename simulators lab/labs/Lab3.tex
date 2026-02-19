@@ -1,0 +1,461 @@
+\section{Lab 3: Understanding URDF and ROS 2 Launch Files}
+
+\subsection{Objective}
+To understand the basics of URDF (Unified Robot Description Format), learn how to write URDF files, visualize them using RViz2, and understand ROS 2 workspace structure and launch files.
+
+\subsection{Requirements}
+\begin{itemize}
+	\item \textbf{Hardware:} Computer with minimum 4GB RAM
+	\item \textbf{Software:} 
+	\begin{itemize}
+		\item Ubuntu 22.04
+		\item ROS 2 Humble
+		\item Visual Studio Code
+		\item RViz2
+	\end{itemize}
+\end{itemize}
+
+\subsection{Theory}
+
+\subsubsection{URDF Basics}
+
+URDF is an XML format used to describe robot models. The main components are:
+
+\textbf{Links:} These represent the rigid parts of the robot like body, wheels, sensors etc. Each link has properties like visual appearance and mass.
+
+\textbf{Joints:} These connect two links together and define how they move relative to each other. Types include:
+\begin{itemize}
+	\item Fixed - no movement
+	\item Revolute - rotation with limits
+	\item Continuous - unlimited rotation
+	\item Prismatic - linear sliding motion
+\end{itemize}
+
+\subsubsection{ROS 2 Workspace Structure}
+
+A typical ROS 2 workspace follows this structure:
+
+\begin{verbatim}
+workspace/
++-- src/
+|   +-- package_description/
+|       +-- urdf/
+|       |   +-- robot2_urdf.urdf
+|       +-- launch/
+|       |   +-- display.launch.py
+|       +-- rviz/
+|       |   +-- robot_view.rviz
+|       +-- package.xml
+|       +-- CMakeLists.txt (for C++) or setup.py (for Python)
++-- build/
++-- install/
++-- log/
+\end{verbatim}
+
+\textbf{Key directories:}
+\begin{itemize}
+	\item \texttt{src/}: Contains source code and packages
+	\item \texttt{build/}: Temporary build files
+	\item \texttt{install/}: Installed packages after building
+	\item \texttt{log/}: Build and execution logs
+\end{itemize}
+
+\subsubsection{Building ROS 2 Packages}
+
+The build process involves:
+\begin{enumerate}
+	\item Navigate to workspace root
+	\item Run \texttt{colcon build} to compile all packages
+	\item Source the setup file: \texttt{source install/setup.bash}
+	\item Launch nodes or packages
+\end{enumerate}
+
+\subsection{Procedure}
+
+\subsubsection{Creating the ROS 2 Package}
+
+We created a package named \texttt{package\_description}:
+
+\begin{verbatim}
+cd ~/ros2_ws/src
+ros2 pkg create package_description --build-type ament_cmake
+\end{verbatim}
+
+Then created the necessary directories:
+\begin{verbatim}
+cd package_description
+mkdir urdf launch rviz config
+\end{verbatim}
+
+\subsubsection{Configuring package.xml}
+
+The \texttt{package.xml} file defines the package metadata and dependencies:
+
+\begin{lstlisting}[language=XML]
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" 
+            schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>package_description</name>
+  <version>0.0.0</version>
+  <description>Robot description package for URDF models</description>
+  <maintainer email="anishkumar59085@gmail.com">justin</maintainer>
+  <license>TODO: License declaration</license>
+  
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  
+  <depend>urdf</depend>
+  <depend>xacro</depend>
+  
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>joint_state_publisher_gui</exec_depend>
+  
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+\end{lstlisting}
+
+\textbf{Key elements explained:}
+\begin{itemize}
+	\item \texttt{<buildtool\_depend>ament\_cmake}: Build system used for compilation
+	\item \texttt{<depend>urdf}: URDF parsing capabilities
+	\item \texttt{<depend>xacro}: Macro language for URDF (advanced usage)
+	\item \texttt{<exec\_depend>}: Runtime dependencies needed when the package runs
+	\item \texttt{robot\_state\_publisher}: Publishes robot state from URDF
+	\item \texttt{joint\_state\_publisher\_gui}: GUI for controlling joints
+	\item \texttt{rviz2}: 3D visualization tool
+\end{itemize}
+
+\subsubsection{Configuring CMakeLists.txt}
+
+The \texttt{CMakeLists.txt} file tells the build system how to install package resources:
+
+\begin{lstlisting}[language=bash]
+cmake_minimum_required(VERSION 3.5)
+project(package_description)
+
+# Find the ament_cmake build tool
+find_package(ament_cmake REQUIRED)
+
+# Install directories to the share folder
+install(
+  DIRECTORY config launch meshes rviz urdf 
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# Export dependencies
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+# Testing configuration
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
+endif()
+
+# Finalize the package
+ament_package()
+\end{lstlisting}
+
+\textbf{Key commands explained:}
+\begin{itemize}
+	\item \texttt{find\_package(ament\_cmake REQUIRED)}: Locates the build system
+	\item \texttt{install(DIRECTORY ...)}: Copies specified directories to install space
+	\item \texttt{DESTINATION share/\$\{PROJECT\_NAME\}}: Where files are installed
+	\item \texttt{ament\_package()}: Finalizes the package configuration
+\end{itemize}
+
+The \texttt{install()} command is crucial - it copies our URDF files, launch files, and RViz configs from the source directory to the install directory where ROS 2 can find them after building.
+
+\subsubsection{Creating Basic URDF}
+
+Created a file named \texttt{robot2\_urdf.urdf} in the \texttt{urdf/} directory:
+
+\begin{lstlisting}[language=XML]
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="diff_robot">
+  
+  <!-- Material Definitions -->
+  <material name="black">
+    <color rgba="0 0 0 1.0"/>
+  </material>
+  <material name="green">
+    <color rgba="0.0 0.6 0 1.0"/>
+  </material>
+  
+  <!-- Base Link -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.1"/>
+      <inertia ixx="0.001665" ixy="0.0" ixz="0.0" 
+               iyy="0.00441225" iyz="0.0" izz="0.00541625"/>
+    </inertial>
+    <visual>
+      <geometry>  
+        <box size="0.7 0.4 0.2"/> 
+      </geometry>   
+      <origin xyz="0.0 0.0 0.1" rpy="0.0 0.0 0.0"/> 
+      <material name="green"/>
+    </visual>
+  </link>
+  
+  <!-- Left Wheel Link -->
+  <link name="left_wheel">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.3"/>
+      <inertia ixx="0.00081252" ixy="0.0" ixz="0.0" 
+               iyy="0.00081252" iyz="0.0" izz="0.0015"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <cylinder radius="0.1" length="0.05"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="1.57 0.0 0.0"/>
+      <material name="black"/>     
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.1" length="0.05"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="1.57 0.0 0.0"/>
+    </collision>
+  </link>
+  
+  <!-- Right Wheel Link -->
+  <link name="right_wheel">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.3"/>
+      <inertia ixx="0.00081252" ixy="0.0" ixz="0.0" 
+               iyy="0.00081252" iyz="0.0" izz="0.0015"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <cylinder radius="0.1" length="0.05"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="1.57 0.0 0.0"/>
+      <material name="black"/>     
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.1" length="0.05"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="1.57 0.0 0.0"/>
+    </collision>
+  </link>
+  
+  <!-- Caster Wheel Link -->
+  <link name="caster_wheel">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.1"/>
+      <inertia ixx="0.00016666" ixy="0.0" ixz="0.0" 
+               iyy="0.00016666" iyz="0.0" izz="0.00016666"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <material name="black"/>            
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </collision>
+  </link>
+  
+  <!-- Left Wheel Joint -->
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin xyz="-0.175 0.225 0.0" rpy="0 0.0 0.0"/>  
+    <axis xyz="0.0 1.0 0.0"/>
+  </joint>
+  
+  <!-- Right Wheel Joint -->
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin xyz="-0.175 -0.225 0.0" rpy="0 0.0 0.0"/>  
+    <axis xyz="0.0 1.0 0.0"/>
+  </joint>
+  
+  <!-- Caster Wheel Joint -->
+  <joint name="caster_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_wheel"/>
+    <origin xyz="0.2 0.0 -0.05" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+</robot>
+\end{lstlisting}
+
+\textbf{Understanding new URDF elements:}
+
+\begin{itemize}
+	\item \textbf{Inertial properties:} Mass and inertia tensor required for physics simulation
+	\item \textbf{Collision geometry:} Defines shapes used for collision detection (separate from visual)
+	\item \textbf{Caster wheel:} A passive spherical wheel for stability (fixed joint, no actuation)
+	\item \textbf{Axis specification:} \texttt{xyz="0.0 1.0 0.0"} means wheels rotate around Y-axis
+\end{itemize}
+
+\subsubsection{Creating the Launch File}
+
+We created a Python launch file \texttt{display.launch.py} in the \texttt{launch/} directory:
+
+\begin{lstlisting}[language=Python]
+#!/usr/bin/env python3
+import os
+from launch import LaunchDescription
+from launch.substitutions import Command
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+def generate_launch_description():
+    # Get package share directory
+    pkg_share = FindPackageShare('package_description').find('package_description')
+    
+    # Path to URDF file
+    urdf_file = os.path.join(pkg_share, 'urdf', 'robot2_urdf.urdf')
+    
+    # Read URDF file
+    with open(urdf_file, 'r') as infp:
+        robot_description = infp.read()
+    
+    # Robot State Publisher Node
+    robot_state_publisher_node = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        output='screen',
+        parameters=[{
+            'robot_description': robot_description,
+            'use_sim_time': False
+        }]
+    )
+    
+    # Joint State Publisher GUI Node
+    joint_state_publisher_gui_node = Node(
+        package='joint_state_publisher_gui',
+        executable='joint_state_publisher_gui',
+        name='joint_state_publisher_gui',
+        output='screen'
+    )
+    
+    # RViz2 Node
+    rviz_config = os.path.join(pkg_share, 'rviz', 'robot_view.rviz')
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config]
+    )
+    
+    return LaunchDescription([
+        robot_state_publisher_node,
+        joint_state_publisher_gui_node,
+        rviz_node  
+    ])
+\end{lstlisting}
+
+\subsubsection{Understanding the Launch File Components}
+
+\textbf{Line-by-line explanation:}
+
+\begin{itemize}
+	\item \texttt{FindPackageShare('package\_description')}: Locates the installed package directory
+	\item \texttt{os.path.join(pkg\_share, 'urdf', 'robot2\_urdf.urdf')}: Constructs the full path to the URDF file
+	\item \texttt{with open(urdf\_file, 'r') as infp}: Reads the URDF file content into a string
+	\item \texttt{robot\_state\_publisher\_node}: Publishes robot state and transforms based on URDF and joint states
+	\item \texttt{joint\_state\_publisher\_gui\_node}: Provides a GUI to manually control joint positions
+	\item \texttt{rviz\_node}: Launches RViz2 visualization tool with a saved configuration
+	\item \texttt{use\_sim\_time: False}: Indicates we're not using simulation time (real-time operation)
+\end{itemize}
+
+\textbf{Key nodes and their roles:}
+
+\begin{enumerate}
+	\item \textbf{robot\_state\_publisher}: Reads the URDF and publishes TF transforms showing where each link is in 3D space
+	\item \textbf{joint\_state\_publisher\_gui}: Allows manual control of joint angles through sliders
+	\item \textbf{rviz2}: 3D visualization tool that displays the robot model and transforms
+\end{enumerate}
+
+\subsubsection{Building and Running}
+
+\textbf{Build the package:}
+\begin{verbatim}
+cd ~/ros2_ws
+colcon build --packages-select package_description
+\end{verbatim}
+
+\textbf{Source the setup file:}
+\begin{verbatim}
+source install/setup.bash
+\end{verbatim}
+
+\textbf{Launch the visualization:}
+\begin{verbatim}
+ros2 launch package_description display.launch.py
+\end{verbatim}
+
+\noindent Figure~\ref{fig:lab3-rviz} shows the RViz visualization captured during the lab.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.85\textwidth]{images/rviz_view.png}
+	\caption{RViz2 view of the robot model with joint state publisher GUI.}
+	\label{fig:lab3-rviz}
+\end{figure}
+
+\subsection{Output}
+
+We successfully created and visualized a differential drive robot model with:
+\begin{itemize}
+	\item A rectangular base (0.7m × 0.4m × 0.2m box)
+	\item Two driven wheels attached with continuous joints (left and right)
+	\item A passive caster wheel for stability (spherical, fixed joint)
+	\item Complete inertial properties for physics simulation
+	\item Collision geometries for accurate interaction
+	\item Interactive joint control through the GUI
+	\item Real-time 3D visualization in RViz2
+\end{itemize}
+
+The RViz2 visualization showed the complete robot model which we could manipulate using the joint state publisher GUI sliders.
+
+\subsection{Inference}
+
+From this lab we learned:
+\begin{itemize}
+	\item ROS 2 packages follow a standard directory structure with \texttt{src/}, \texttt{build/}, and \texttt{install/} directories
+	\item \texttt{package.xml} defines package metadata, dependencies, and build type
+	\item \texttt{CMakeLists.txt} specifies how to build and install package resources
+	\item The \texttt{install()} command in CMakeLists.txt copies files to the install space
+	\item \texttt{<exec\_depend>} tags specify runtime dependencies needed to run the package
+	\item \texttt{colcon build} compiles packages and creates the install space
+	\item \texttt{source install/setup.bash} is required to make the package available in the current terminal
+	\item Launch files in Python provide a structured way to start multiple nodes simultaneously
+	\item \texttt{FindPackageShare} helps locate package resources regardless of installation location
+	\item The robot state publisher converts URDF and joint states into TF transforms
+	\item Joint state publisher GUI allows interactive testing of robot models
+	\item RViz2 configuration files can be saved and reused for consistent visualization setups
+	\item URDF files follow a parent-child structure where links are connected by joints
+	\item Joint types determine how parts can move - continuous joints allow unlimited rotation
+	\item Proper dependency declaration in package.xml prevents missing package errors
+\end{itemize}
+
+\subsection{Conclusions}
+
+We learned the complete workflow of creating a ROS 2 package with URDF robot descriptions. This included understanding the workspace structure, writing launch files to coordinate multiple nodes, using \texttt{colcon build} to compile the package, and sourcing the setup file to access the package. The combination of robot state publisher, joint state publisher GUI, and RViz2 provided an effective environment for developing and testing robot models. This foundation is essential for working with both simulated and real robots in ROS 2.
+
+\clearpage

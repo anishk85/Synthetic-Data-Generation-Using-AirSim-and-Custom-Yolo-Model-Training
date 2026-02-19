@@ -1,0 +1,95 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Model weights and checkpoints
+*.pt
+*.pth
+*.onnx
+*.weights
+!yolo11n.pt
+!yolo26n.pt
+
+# Dataset and Training
+dataset/
+runs/
+inference_results/
+test_results/
+
+# Flight logs and recordings
+flightLogs/
+2026-*/
+*.txt
+airsim_rec.txt
+
+# Images and media
+images/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp4
+*.avi
+
+# Allow README documentation images
+!docs/
+!docs/images/
+!docs/images/*.png
+!docs/images/*.jpg
+!docs/images/*.jpeg
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+
+# AirSim specific
+settings.json
+
+# LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.pdf
+*.synctex.gz
+
+# OS
+Thumbs.db
+.DS_Store

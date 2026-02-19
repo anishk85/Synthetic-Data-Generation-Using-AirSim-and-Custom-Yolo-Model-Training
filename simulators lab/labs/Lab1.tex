@@ -1,0 +1,158 @@
+\section{Lab 1: Introduction to Simulators: AirSim, PyBullet, Gazebo}
+
+\subsection{Objective}
+To get an overview of three different robot simulators (AirSim, PyBullet, and Gazebo), understand what they are used for, and learn how to install them.
+
+\subsection{Requirements}
+\begin{itemize}
+	\item \textbf{Hardware:} Computer with at least 8GB RAM, decent processor
+	\item \textbf{Software:} 
+	\begin{itemize}
+		\item Windows 10/11, Ubuntu 22.04 (for Gazebo Classic) or Ubuntu 22.04 (for ROS~2 Humble + Gazebo Harmonic)
+		\item Python 3.8 or higher
+	\end{itemize}
+\end{itemize}
+
+\subsection{Theory}
+
+Robot simulators let us test robots in a virtual environment before using real hardware. This saves time and money and is safer for testing.
+
+\textbf{PyBullet:} A physics simulation library with Python support. It's lightweight and good for learning. Many people use it for reinforcement learning and basic robotics.
+
+\textbf{AirSim:} Made by Microsoft for simulating drones and cars. It has realistic graphics and physics, useful for testing autonomous vehicles.
+
+\textbf{Gazebo:} A popular simulator used with ROS (Gazebo Classic) and ROS~2 (modern Gazebo, e.g., Harmonic). It can simulate complex environments and multiple robots at once.
+
+\subsection{Procedure}
+
+\subsubsection{PyBullet Installation}
+
+\textbf{On Windows:}
+\begin{lstlisting}[language=bash]
+# Open Command Prompt
+pip install pybullet
+
+# Check if it worked
+python -c "import pybullet"
+\end{lstlisting}
+
+\textbf{On Linux:}
+\begin{lstlisting}[language=bash]
+# Install pip if needed
+sudo apt-get install python3-pip
+
+# Install PyBullet
+pip3 install pybullet
+
+# Check installation
+python3 -c "import pybullet"
+\end{lstlisting}
+
+\subsubsection{AirSim Installation}
+
+\textbf{On Windows:}
+\begin{enumerate}
+	\item Download pre-built binaries from AirSim GitHub releases
+	\item Extract the zip file
+	\item Run the executable file
+	\item Install Python package:
+\begin{lstlisting}[language=bash]
+pip install airsim
+\end{lstlisting}
+\end{enumerate}
+
+\textbf{On Linux:}
+\begin{lstlisting}[language=bash]
+# Install dependencies
+sudo apt-get install git
+
+# Install Python API
+pip install airsim
+\end{lstlisting}
+
+\subsubsection{Gazebo Installation (Classic: Gazebo 11)}
+
+\textbf{On Ubuntu 22.04:}
+\begin{lstlisting}[language=bash]
+# Update package list
+sudo apt-get update
+
+# Install Gazebo Classic (Gazebo 11)
+sudo apt-get install gazebo11
+
+# Check version
+gazebo --version
+\end{lstlisting}
+
+For ROS~1 Noetic integration:
+\begin{lstlisting}[language=bash]
+sudo apt-get install ros-noetic-gazebo-ros-pkgs
+\end{lstlisting}
+
+\subsubsection{Gazebo Installation (Modern: Gazebo Harmonic)}
+
+\textbf{On Ubuntu 22.04:}
+\begin{lstlisting}[language=bash]
+# Update package list
+sudo apt-get update
+
+# Install Gazebo Harmonic
+sudo apt-get install gz-harmonic
+
+# Check version
+gz sim --version
+\end{lstlisting}
+
+For ROS~2 Humble integration:
+\begin{lstlisting}[language=bash]
+sudo apt-get install ros-humble-ros-gz
+\end{lstlisting}
+
+\noindent\textbf{Note (my exploration):} I explored Gazebo Sim Harmonic (\texttt{gz sim 8}) and installed it on my system. Since my system uses ROS~2 Humble, Gazebo Harmonic is the stable choice for my setup.
+
+\subsubsection{Testing PyBullet}
+
+\begin{lstlisting}[language=Python]
+import pybullet as p
+import pybullet_data
+import time
+
+# Start simulation
+p.connect(p.GUI)
+p.setAdditionalSearchPath(pybullet_data.getDataPath())
+p.setGravity(0, 0, -9.8)
+
+# Load a plane and robot
+planeId = p.loadURDF("plane.urdf")
+robotId = p.loadURDF("r2d2.urdf", [0, 0, 1])
+
+# Run for some time
+for i in range(1000):
+    p.stepSimulation()
+    time.sleep(1./240.)
+
+p.disconnect()
+\end{lstlisting}
+
+\subsection{Output}
+
+We successfully installed all three simulators. PyBullet was the easiest - just one pip install command. AirSim took more time because of the download size. Gazebo installation was straightforward on Ubuntu.
+
+When we ran the PyBullet test code, a window opened showing a ground plane and a robot model. The robot fell and settled on the ground due to gravity.
+
+\subsection{Inference}
+
+From the installation and basic testing:
+\begin{itemize}
+	\item PyBullet is the simplest to install and start using - good for beginners
+	\item AirSim needs more disk space and computer power but gives better graphics
+	\item Gazebo works best on Linux and integrates well with ROS
+	\item Each simulator has different use cases - PyBullet for quick tests, AirSim for vehicles, Gazebo for ROS projects
+	\item Installation difficulty varies - PyBullet is easiest, AirSim and Gazebo need more steps
+\end{itemize}
+
+\subsection{Conclusions}
+
+We learned about three different robot simulators and how to install them. PyBullet is good for getting started quickly with basic simulations. AirSim is better when you need realistic visuals for drones or cars. Gazebo is useful when working with ROS or need complex multi-robot setups. Understanding these tools helps in choosing the right simulator for different robotics projects.
+
+\clearpage

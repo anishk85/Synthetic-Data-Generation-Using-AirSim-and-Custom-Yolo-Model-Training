@@ -1,0 +1,47 @@
+% You should not modify anything from here ... -------------
+\RequirePackage{etex}
+\documentclass[a4paper]{article}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype,listings,color,parskip}
+\usepackage[margin=2cm]{geometry}
+\usepackage{hyperref}
+\lstset{
+  language=C,
+  tabsize=2,
+  showstringspaces=false,
+  breaklines=true,
+  basicstyle=\ttfamily,
+  keywordstyle=\color[rgb]{0.1,0.3,0.7}\ttfamily,
+  stringstyle=\color[rgb]{0.7,0.1,0.3}\ttfamily,
+  commentstyle=\color[rgb]{0.3,0.4,0.3}\ttfamily,
+  columns=fixed,
+  numberstyle=\sffamily\scriptsize,
+  backgroundcolor=\color[rgb]{0.95,0.95,0.95},
+  frame=lines,
+  framexleftmargin=5pt,
+  numbers = left,
+  numberstyle = \footnotesize
+}
+\usepackage{listings}
+\usepackage{graphicx}
+\graphicspath{{labs/figures/}}
+% ... until here -------------------------------------------
+
+\usepackage[nottoc]{tocbibind}
+
+\begin{document}
+\input{labs/Firstpage.tex}
+\input{labs/Index.tex}
+\input{labs/Lab1.tex}
+
+\input{labs/Lab2.tex}
+\input{labs/Lab3.tex}
+\input{labs/Lab4.tex}
+\input{labs/Lab5.tex}
+\input{labs/Lab6.tex}
+
+
+
+\end{document}
